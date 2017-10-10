@@ -58,16 +58,15 @@ for i in reversed(list(range(a))):
 
 alphs = 'abcdefghijklmnopqrstuvwxyz'
 
-n = 5
-b = (2*n) -1
-for i in range(b):
-    lis = []
-    for j in reversed(list(range(b))):
-        z = min(abs(b-i), i)
-        y = min(b-j, j)
-        var = '-'
-        if j in range((n-1)-z, n+z):
-            var = alphs[max(abs(j-i), abs(i-j))]
-        lis.append(var)
-    print(lis)
-            
+    n = 5
+    b = (2*n) -1
+    for i in range(b):
+        lis = []
+        for j in reversed(list(range(b))):
+            z = min(abs(b-i-1), i)
+            y = min(abs(b-j-1), j)
+            var = '-'
+            if j in range((n-1)-z, n+z):
+                var = alphs[b-(y+z) -1]
+            lis.append(var)
+        print(lis)

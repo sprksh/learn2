@@ -1,0 +1,17 @@
+total 84
+-rw-rw-r-- 1 sp sp   475 Sep  7 17:27 a.py
+-rw-rw-r-- 1 sp sp  1570 Sep  7 17:26 arr.py
+-rw-rw-r-- 1 sp sp   808 Sep 16 19:49 dd.out
+-rw-rw-r-- 1 sp sp   345 Sep  2 01:36 fibonacci.py
+-rw-rw-r-- 1 sp sp  1348 Sep 12 02:04 graph1.py
+-rw-rw-r-- 1 sp sp  1679 Sep 14 18:03 greedy.py
+-rw-rw-r-- 1 sp sp  1334 Sep 15 11:39 grid.py
+-rw-rw-r-- 1 sp sp     0 Sep  2 01:06 __init__.py
+-rw-rw-r-- 1 sp sp   475 Aug 21 20:30 Learnings.py
+-rw-rw-r-- 1 sp sp 26574 Aug 21 15:54 prep.sublime-workspace
+drwxrwxr-x 2 sp sp  4096 Sep 10 22:44 __pycache__
+drwxrwxr-x 2 sp sp  4096 Sep 16 11:35 qq
+-rw-rw-r-- 1 sp sp  1427 Aug 27 04:12 req.py
+-rw-rw-r-- 1 sp sp  1987 Sep 10 22:44 search.py
+-rw-rw-r-- 1 sp sp   235 Aug 21 16:49 series.py
+-rw-rw-r-- 1 sp sp   276 Sep 15 03:27 sherlock.py
