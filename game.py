@@ -97,7 +97,7 @@ def game(player1, player2):
     key = KEY_RIGHT                                                    # Initializing values
 
     player1.position = [10, 1]
-    player2.position = [10, 58]
+    player2.position = [10, 78]
 
     # Timeout value will be based on state
     # States: 
@@ -113,9 +113,25 @@ def game(player1, player2):
         win.addstr(0, 52, 'Score : ')
         if game.state == 'select':
             win.timeout(150)
-            start = 3
-            for s in player1.spells_available:
-                win.addch(player1.position[0], player1.position[1], '#')
+            start1, y = 3, 30
+            for i, s in enumerate(player1.spells_available):
+                if start1 + len(s.name) +3 >= 40:
+                    start1 = 3
+                    y += 2
+                win.addstr(y, start1, s.name)
+                start1 = start1 + len(s.name) + 2
+            start2, y = 43, 30
+            for i, s in enumerate(player1.spells_available):
+                spel = '{0}: {1} ({2})'.format(i+1, s.name, s.power)
+                if start2 + len(spel) + 2 >= 80:
+                    start2 = 43
+                    y += 2
+                spel = '{0}: {1} ({2})'.format(i+1, s.name, s.power)
+                win.addstr(y, start2, spel)
+                start2 = start2 + len(s.name) + 2
+
+            if key not in [1,2,3,4,5,6,7,8,9,10, 27]:     # If an invalid key is pressed
+                key = prevKey
         if game.state == 'spell':
             win.timeout(20)
         if game.state == 'score':
