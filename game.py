@@ -130,10 +130,27 @@ def game(player1, player2):
                 win.addstr(y, start2, spel)
                 start2 = start2 + len(s.name) + 2
 
+            event = win.getch()
+            key = event
             if key not in [1,2,3,4,5,6,7,8,9,10, 27]:     # If an invalid key is pressed
-                key = prevKey
+                pass
+            else:
+                try:
+                    this_spell1 = player1.spells_available[key-1]
+                except Exception:
+                    print('You lose this spell')
+                    this_spell1 = None
+                this_spell2 = player1.spells_available[randint(0, len(player2.spells_available) - 1)]
+                game.state = 'spell'
+
         if game.state == 'spell':
             win.timeout(20)
+            win.addstr(2, 2, this_spell1.name)                # Printing 'Score' and headers
+            win.addstr(0, 27, ' Wizardry ')
+            win.addstr(2, 52, this_spell2.name)
+            p1_spell = [[10, 1]]
+            p1_spell.append([10, p1_spell[-1][-1] + 1])
+            win.addch(p1_spell[0][0], p1_spell[0][1], '#')
         if game.state == 'score':
             win.timeout(150)
 
