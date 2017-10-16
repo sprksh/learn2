@@ -87,7 +87,7 @@ def create_player():
 def game(player1, player2):
     game = Game(player1, player2)
     curses.initscr()
-    win = curses.newwin(20, 60, 0, 0)
+    win = curses.newwin(40, 80, 0, 0)
     win.keypad(1)
     curses.noecho()
     curses.curs_set(0)
@@ -113,6 +113,9 @@ def game(player1, player2):
         win.addstr(0, 52, 'Score : ')
         if game.state == 'select':
             win.timeout(150)
+            start = 3
+            for s in player1.spells_available:
+                win.addch(player1.position[0], player1.position[1], '#')
         if game.state == 'spell':
             win.timeout(20)
         if game.state == 'score':
