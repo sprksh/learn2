@@ -108,27 +108,30 @@ def game(player1, player2):
 
     while key != 27:                                                   # While Esc key is not pressed
         win.border(0)
-        win.addstr(0, 2, 'Score : ')                # Printing 'Score' and headers
+        win.addstr(0, 2, 'Score : ' + str(player1.power) + ' ')
         win.addstr(0, 27, ' Wizardry ')
-        win.addstr(0, 52, 'Score : ')
+        win.addstr(0, 52, 'Score : ' + str(player1.power) + ' ')
+        for i in range(80):
+            win.addch(20, i, '_')
         if game.state == 'select':
             win.timeout(150)
             start1, y = 3, 30
             for i, s in enumerate(player1.spells_available):
-                if start1 + len(s.name) +3 >= 40:
+                spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
+                if start1 + len(spel) + 2 >= 40:
                     start1 = 3
                     y += 2
-                win.addstr(y, start1, s.name)
-                start1 = start1 + len(s.name) + 2
+                win.addstr(y, start1, spel)
+                start1 = start1 + len(spel) + 2
             start2, y = 43, 30
             for i, s in enumerate(player1.spells_available):
-                spel = '{0}: {1} ({2})'.format(i+1, s.name, s.power)
+                spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
                 if start2 + len(spel) + 2 >= 80:
                     start2 = 43
                     y += 2
                 spel = '{0}: {1} ({2})'.format(i+1, s.name, s.power)
                 win.addstr(y, start2, spel)
-                start2 = start2 + len(s.name) + 2
+                start2 = start2 + len(spel) + 2
 
             event = win.getch()
             key = event
@@ -138,19 +141,22 @@ def game(player1, player2):
                 try:
                     this_spell1 = player1.spells_available[key-1]
                 except Exception:
-                    print('You lose this spell')
-                    this_spell1 = None
+                    # print('You lose this spell')
+                    this_spell1 = player1.spells_available[-1]
                 this_spell2 = player1.spells_available[randint(0, len(player2.spells_available) - 1)]
                 game.state = 'spell'
 
         if game.state == 'spell':
             win.timeout(20)
-            win.addstr(2, 2, this_spell1.name)                # Printing 'Score' and headers
-            win.addstr(0, 27, ' Wizardry ')
+            win.addstr(2, 2, this_spell1.name)
             win.addstr(2, 52, this_spell2.name)
             p1_spell = [[10, 1]]
-            p1_spell.append([10, p1_spell[-1][-1] + 1])
-            win.addch(p1_spell[0][0], p1_spell[0][1], '#')
+            p2_spell = [[10, 79]]
+            while p1_spell[-1][-1] < 80:
+                p1_spell.append([10, p1_spell[-1][-1] + 1])
+                p1_spell.append([10, p1_spell[-1][-1] - 1])
+                win.addch(p1_spell[0][0], p1_spell[0][1], '.')
+                win.addch(p1_spell[0][0], p2_spell[0][1], '.')
         if game.state == 'score':
             win.timeout(150)
 
