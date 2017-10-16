@@ -41,12 +41,13 @@ class Spell:
 
 class Game:
 
-    def __init__(self, player, opponent, time):
+    def __init__(self, player, opponent):
         self.player = player
         self.opponent = opponent
-        self.starttime = time
+        self.starttime = ''
         # self.time = time
-        self.state = state
+        # states: 'select', 'spell', 'score'
+        self.state = 'select'
 
 
 pps = ['Harry', 'Voldemort', 'Dumbledore', 'Snape', 'Hermoine', 'Ron']
@@ -84,6 +85,7 @@ def create_player():
 
 
 def game(player1, player2):
+    game = Game(player1, player2)
     curses.initscr()
     win = curses.newwin(20, 60, 0, 0)
     win.keypad(1)
@@ -95,14 +97,32 @@ def game(player1, player2):
     key = KEY_RIGHT                                                    # Initializing values
 
     player1.position = [10, 1]
-    player2.position = [10, 59]
+    player2.position = [10, 58]
+
+    # Timeout value will be based on state
+    # States: 
+    # 1. Selection of spell, right/left, up/d key to select spell
+    # 2. Hitting of spell. timeout very low to show fast movement, Will show the spell name on screen
+    # 3. Show updated score
+
 
     while key != 27:                                                   # While Esc key is not pressed
         win.border(0)
         win.addstr(0, 2, 'Score : ')                # Printing 'Score' and headers
         win.addstr(0, 27, ' Wizardry ')
         win.addstr(0, 52, 'Score : ')
-        win.timeout(150)          # Increases the speed of Snake as its length increases
+        if game.state == 'select':
+            win.timeout(150)
+        if game.state == 'spell':
+            win.timeout(20)
+        if game.state == 'score':
+            win.timeout(150)
+
+        
+        
+
+        win.addch(player1.position[0], player1.position[1], '#')
+        win.addch(player2.position[0], player2.position[1], '#')
 
         prevKey = key                                                  # Previous key pressed
         event = win.getch()
@@ -121,8 +141,7 @@ def game(player1, player2):
         if key not in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, 27]:     # If an invalid key is pressed
             key = prevKey
 
-        win.addch(player1.position[0], player1.position[1], '#')
-        win.addch(player2.position[0], player2.position[1], '#')
+        
 
     curses.endwin()
 
