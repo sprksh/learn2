@@ -153,7 +153,7 @@ def game(player1, player2):
             win.addch(p1_spell[0][0], p1_spell[0][1], '#')
         if game.state == 'score':
             win.timeout(150)
-
+            
         
         
 
