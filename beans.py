@@ -13,14 +13,40 @@ def find_k(arr, n, m):
                     return beans
             
 
-n, m = [int(t) for t in input().strip().split()]
-arr = [int(i) for i in input().strip().split()]
-arr.sort()
-if not m or not n:
-    print('NO')
-else:
+    n, m = [int(t) for t in input().strip().split()]
+    arr = [int(i) for i in input().strip().split()]
+    arr.sort()
     beans = find_k(arr, n, m)
-    if not beans is None:
+    if beans:
         print(beans)
+    else:
+        print('NO')
 
 
+q = int(input())
+
+def minC(arr, m, n):
+
+    if (n == 0): 
+        return 0
+ 
+    res = 100000
+ 
+    for i in range(m):
+        if arr[i] <= n:
+            sub_res = minC(arr, m, n-arr[i])
+ 
+            if sub_res != 100000 and sub_res < res-1:
+                res = sub_res + 1
+    return res
+        
+   
+for j in range(q):
+    n, m = [int(t) for t in input().strip().split()]
+    arr = [int(i) for i in input().strip().split()]
+    arr = sorted(arr, reverse=True)
+    beans = minC(arr, m, n)
+    if beans:
+        print(beans)
+    else:
+        print('NO')
