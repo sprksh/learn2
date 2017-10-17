@@ -17,7 +17,6 @@
 
 # curses alternate for windows: http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
 
-
 import curses
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
 from random import randint
@@ -32,6 +31,13 @@ class Player:
         self.speciality = []
         self.spells_available = []
         self.position = []
+        self.this_spell = None
+
+    def hit(self, ind):
+        spell = self.spells_available.pop(ind)
+        self.this_spell = spell
+        self.power -=  spell.power//2
+        return spell
 
 
 class Spell:
@@ -40,6 +46,9 @@ class Spell:
         self.name = name
         self.power = power
         self.opposite = ''
+
+    def __repr__(self):
+        return '{}! ({})'.format(self.name, self.power)
 
 class Game:
 
@@ -63,112 +72,149 @@ active_spells = []
 
 def create_player():
     name = input('Type the name of player: ')
-    # if name in players:
-    # else:
-
-    #     speciality1 = int(input('Select the specialities by number: '))
-    #     speciality2 = int(input('Select one more: '))
-    #     specialities = [speciality1, speciality2]
-    # player1 = Player(name)
     player1 = Player(pps[0])
     p2 = pps[randint(0, 5)]
     player2 = Player(name)
     for k in spells:
-        active_spells.append(Spell(k, spells[k]))
-    player1.spells_available = active_spells
-    player1.speciality = [active_spells[randint(0, 5)]]
-    player2.spells_available = active_spells
-    player2.speciality = [active_spells[randint(0, 5)]]
+        player1.spells_available.append(Spell(k, spells[k]))
+        player2.spells_available.append(Spell(k, spells[k]))
     print('Game between {} and {}'.format(player1.name, player2.name))
 
     o = input('Press any key to start game: ')
     if o:
-        game(player1, player2)
+        g = Game(player1, player2)
+        game_func(g)
 
 
-def game(player1, player2):
-    game = Game(player1, player2)
+def game_func(game):
+    player1 = game.player
+    player2 = game.opponent
     curses.initscr()
-    win = curses.newwin(40, 80, 0, 0)
+    win = curses.newwin(32, 80, 0, 0)
     win.keypad(1)
     curses.noecho()
     curses.curs_set(0)
     win.border(0)
     win.nodelay(1)
 
-    key = KEY_RIGHT                                                    # Initializing values
-
+    key = KEY_RIGHT
+    
+    p1_spell = [[10, 2], [10, 3]]
+    p2_spell = [[10, 77], [10, 76]]
+    
     player1.position = [10, 1]
     player2.position = [10, 78]
+    h = 0
 
-    # Timeout value will be based on state
-    # States: 
-    # 1. Selection of spell, right/left, up/d key to select spell
-    # 2. Hitting of spell. timeout very low to show fast movement, Will show the spell name on screen
-    # 3. Show updated score
-
-
-    while key != 27:                                                   # While Esc key is not pressed
+    while key != 27:
         win.border(0)
-        win.addstr(0, 2, 'Score : ' + str(player1.power) + ' ')
-        win.addstr(0, 27, ' Wizardry ')
-        win.addstr(0, 52, 'Score : ' + str(player1.power) + ' ')
+        win.addstr(0, 2, player1.name + 'Score : ' + str(player1.power) + ' ')
+        win.addstr(0, 27, ' Hogwarts ')
+        win.addstr(0, 52, player2.name + 'Score : ' + str(player2.power) + ' ')
 
         win.addch(player1.position[0], player1.position[1], '#')
         win.addch(player2.position[0], player2.position[1], '#')
 
         for i in range(80):
             win.addch(20, i, '_')
+
+        start1, y = 3, 23
+        for i, s in enumerate(player1.spells_available):
+            spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
+            if start1 + len(spel) + 2 >= 40:
+                start1 = 3
+                y += 1
+            win.addstr(y, start1, spel)
+            start1 = start1 + len(spel) + 2
+        start2, y = 43, 23
+        for i, s in enumerate(player2.spells_available):
+            spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
+            if start2 + len(spel) + 2 >= 80:
+                start2 = 43
+                y += 1
+            win.addstr(y, start2, spel)
+            start2 = start2 + len(spel) + 2
+        
+        event = win.getch()
+        if not event:
+            win.addstr(5, 2, 'Press a number based on spell to cast')
+        key = 500 if event == -1 else event 
+
         if game.state == 'select':
             win.timeout(150)
-            start1, y = 3, 30
-            for i, s in enumerate(player1.spells_available):
-                spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
-                if start1 + len(spel) + 2 >= 40:
-                    start1 = 3
-                    y += 2
-                win.addstr(y, start1, spel)
-                start1 = start1 + len(spel) + 2
-            start2, y = 43, 30
-            for i, s in enumerate(player1.spells_available):
-                spel = '{0}: {1} ({2}) '.format(i+1, s.name, s.power)
-                if start2 + len(spel) + 2 >= 80:
-                    start2 = 43
-                    y += 2
-                spel = '{0}: {1} ({2})'.format(i+1, s.name, s.power)
-                win.addstr(y, start2, spel)
-                start2 = start2 + len(spel) + 2
 
-            event = win.getch()
-            win.addstr(10, 30, str(event))
-            
-            if event and event in [49,50,51,52,53,54,55,56,57,58]:
-                win.addstr(10, 10, 'Press the number')
-                try:
-                    this_spell1 = player1.spells_available[key-49]
-                except Exception:
-                    # print('You lose this spell')
-                    this_spell1 = player1.spells_available[-1]
-                this_spell2 = player1.spells_available[randint(0, len(player2.spells_available) - 1)]
-                game.state = 'spell'
+            if not event == -1:
+                win.addstr(10, 30, str(event))
+            else:
+                event = None
+            if key and key in [49,50,51,52,53,54,55,56,57,58]:
 
-        if game.state == 'spell':
-            win.timeout(20)
-            win.addstr(2, 2, this_spell1.name)
-            win.addstr(2, 52, this_spell2.name)
-            p1_spell = [[10, 1]]
-            p2_spell = [[10, 79]]
-            while p1_spell[-1][-1] < 80:
-                p1_spell.append([10, p1_spell[-1][-1] + 1])
-                p1_spell.append([10, p1_spell[-1][-1] - 1])
-                win.addch(p1_spell[0][0], p1_spell[0][1], '.')
-                win.addch(p1_spell[0][0], p2_spell[0][1], '.')
+                spell1 = player1.hit(key - 49)
+                win.addstr(5, 2, str(spell1))
 
-        if game.state == 'score':
-            win.timeout(150)
+                spell2 = player2.hit(randint(0, len(player2.spells_available) - 1))
+                win.addstr(5, 52, str(spell2))
+
+                game.state = 'spells'
+
+
+        elif game.state == 'spells':
+            win.timeout(1)
+            p1_spell.append([10, p1_spell[-1][-1] + 1])
+            p1_spell.append([10, p1_spell[-1][-1] + 1])
+            p2_spell.append([10, p2_spell[-1][-1] - 1])
+            p2_spell.append([10, p2_spell[-1][-1] - 1])
+            if p1_spell[-1][-1] <= p2_spell[-1][-1]:
+                for i in range(len(p1_spell)):
+                    win.addch(p1_spell[i][0], p1_spell[i][1], '-')
+                    win.addch(p2_spell[i][0], p2_spell[i][1], '-')
+            else:
+                win.addch(p2_spell[0][0], p2_spell[-1][1], '*')
+                clash_result = clash(player1, player2)
+                result = check_results(player1, player2, game)
+                if result:
+                    curses.endwin()
+                    print(result)
+                elif clash_result:
+                    curses.endwin()
+                    print(clash_result)
+                else:
+                    p1_spell = [[10, 2], [10, 3]]
+                    p2_spell = [[10, 77], [10, 76]]
+                    win = curses.newwin(32, 80, 0, 0)
+                    game.state = 'select'
 
     curses.endwin()
 
+def clash(player1, player2):
+    spell1, spell2 = player1.this_spell, player2.this_spell
+    if spell1.power > spell2.power:
+        if spell1.power - spell2.power >= 5:
+            return 'Player 1 Kills Player 2, Player 1 wins'
+        else:
+            player1.power -= (spell2.power - spell1.power)
+    elif spell1.power < spell2.power:
+        if spell2.power - spell1.power >= 5:
+            return 'Player 2 Kills Player 1, Player 2 wins'
+        else:
+            player2.power -= (spell1.power - spell2.power)
+    return None
+
+
+
+def check_results(player1, player2, game):
+    if player1.power < 10:
+        return 'Player1 Lost'
+    if player2.power < 10:
+        return 'Player2 Lost'
+    if not player1.spells_available and not player2.spells_available:
+        if player1.power > player2.power:
+            return 'Player2 Lost'
+        else:
+            return 'Player1 Lost'
+    if not player2.spells_available:
+        return 'Player2 Lost'
+    return None
 
 if __name__ == '__main__':
     print('The game will start in 2 seconds')
