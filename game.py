@@ -15,6 +15,8 @@
 # If your power <= 0
 # if spell strength difference > 5
 
+# curses alternate for windows: http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
+
 
 import curses
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
@@ -111,6 +113,10 @@ def game(player1, player2):
         win.addstr(0, 2, 'Score : ' + str(player1.power) + ' ')
         win.addstr(0, 27, ' Wizardry ')
         win.addstr(0, 52, 'Score : ' + str(player1.power) + ' ')
+
+        win.addch(player1.position[0], player1.position[1], '#')
+        win.addch(player2.position[0], player2.position[1], '#')
+
         for i in range(80):
             win.addch(20, i, '_')
         if game.state == 'select':
@@ -134,12 +140,12 @@ def game(player1, player2):
                 start2 = start2 + len(spel) + 2
 
             event = win.getch()
-            key = event
-            if key not in [1,2,3,4,5,6,7,8,9,10, 27]:     # If an invalid key is pressed
-                pass
-            else:
+            win.addstr(10, 30, str(event))
+            
+            if event and event in [49,50,51,52,53,54,55,56,57,58]:
+                win.addstr(10, 10, 'Press the number')
                 try:
-                    this_spell1 = player1.spells_available[key-1]
+                    this_spell1 = player1.spells_available[key-49]
                 except Exception:
                     # print('You lose this spell')
                     this_spell1 = player1.spells_available[-1]
@@ -157,33 +163,9 @@ def game(player1, player2):
                 p1_spell.append([10, p1_spell[-1][-1] - 1])
                 win.addch(p1_spell[0][0], p1_spell[0][1], '.')
                 win.addch(p1_spell[0][0], p2_spell[0][1], '.')
+
         if game.state == 'score':
             win.timeout(150)
-            
-        
-        
-
-        win.addch(player1.position[0], player1.position[1], '#')
-        win.addch(player2.position[0], player2.position[1], '#')
-
-        prevKey = key                                                  # Previous key pressed
-        event = win.getch()
-        key = key if event == -1 else event
-
-        if key not in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, 27]:     # If an invalid key is pressed
-            key = prevKey
-
-        if key == ord(' '):                                            # If SPACE BAR is pressed, wait for another
-            key = -1                                                   # one (Pause/Resume)
-            while key != ord(' '):
-                key = win.getch()
-            key = prevKey
-            continue
-
-        if key not in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, 27]:     # If an invalid key is pressed
-            key = prevKey
-
-        
 
     curses.endwin()
 
