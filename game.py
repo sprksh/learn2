@@ -23,7 +23,9 @@ from collections import namedtuple
 
 
 class Player:
-
+    """
+    Player Class: gives player objects
+    """
     def __init__(self, name):
         self.name = name
         self.power = 100
@@ -40,7 +42,9 @@ class Player:
 
 
 class Spell:
-
+    """
+    Contains spells with their properties. Can be extended
+    """
     def __init__(self, name, power, opposite=None):
         self.name = name
         self.power = power
@@ -50,6 +54,9 @@ class Spell:
         return '{}! ({})'.format(self.name, self.power)
 
 class Game:
+    """
+    Active game object
+    """
 
     def __init__(self, player, opponent, state=None):
         self.player = player
@@ -117,9 +124,9 @@ def explore():
     create_player()
 
 
-def initiate():
-    for k in sps:
-        active_spells.append(Spell(k, spells[k]))
+# def initiate():
+#     for k in sps:
+#         active_spells.append(Spell(k, spells[k]))
 
 def create_player():
 
@@ -161,7 +168,8 @@ def create_player():
         g = build_from_file(file)
         game_func(g)
 
-def build_from_file(file):
+
+def build_from_file(file):                      # For resuming a saved game
     with open(file) as f:
         jd = f.read()
         g = json.loads(jd, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
@@ -190,8 +198,8 @@ def build_from_file(file):
     return game
 
 
-def game_func(game):
-    player1 = game.player
+def game_func(game):                                # This function runs in a while loop to 
+    player1 = game.player                           # render the curses screen
     player2 = game.opponent
     curses.initscr()
     win = curses.newwin(32, 80, 0, 0)
@@ -210,7 +218,7 @@ def game_func(game):
     player2.position = [10, 78]
     h = 0
 
-    while key != 27:
+    while key != 27:                                    # Until esc key is pressed
         win.border(0)
         win.addstr(0, 2, ' ' + player1.name + ' : ' + str(player1.power) + ' ')
         win.addstr(0, 30, ' Hogwarts ')
@@ -308,7 +316,7 @@ def game_func(game):
     curses.endwin()
 
 
-def clash(player1, player2):
+def clash(player1, player2):                                    # Function to calculate the effects of one spell
     spell1, spell2 = player1.this_spell, player2.this_spell
 
     if spell1 == player1.speciality:
@@ -329,7 +337,7 @@ def clash(player1, player2):
     return None
 
 
-def check_results(player1, player2, game):
+def check_results(player1, player2, game):                          # Check final results
     if player1.power < 10:
         return 'Player1 Lost'
     if player2.power < 10:
