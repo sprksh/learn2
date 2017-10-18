@@ -1,0 +1,113 @@
+{
+    "player": {
+        "name": "Harry Potter",
+        "power": 97,
+        "speciality": {
+            "name": "Expelliarmus",
+            "power": 5,
+            "opposite": ""
+        },
+        "spells_available": [
+            {
+                "name": "Avada Kedavra",
+                "power": 10,
+                "opposite": ""
+            },
+            {
+                "name": "Expelliarmus",
+                "power": 5,
+                "opposite": ""
+            },
+            {
+                "name": "Annihilate",
+                "power": 9,
+                "opposite": ""
+            },
+            {
+                "name": "Imperio",
+                "power": 7,
+                "opposite": ""
+            },
+            {
+                "name": "Oppugno",
+                "power": 3,
+                "opposite": ""
+            },
+            {
+                "name": "Levicorpus",
+                "power": 6,
+                "opposite": ""
+            },
+            {
+                "name": "Locomotor Mortis",
+                "power": 1,
+                "opposite": ""
+            }
+        ],
+        "position": [
+            10,
+            1
+        ],
+        "this_spell": {
+            "name": "Expulso",
+            "power": 2,
+            "opposite": ""
+        }
+    },
+    "opponent": {
+        "name": "Voldemort",
+        "power": 99,
+        "speciality": {
+            "name": "Avada Kedavra",
+            "power": 10,
+            "opposite": ""
+        },
+        "spells_available": [
+            {
+                "name": "Avada Kedavra",
+                "power": 10,
+                "opposite": ""
+            },
+            {
+                "name": "Annihilate",
+                "power": 9,
+                "opposite": ""
+            },
+            {
+                "name": "Imperio",
+                "power": 7,
+                "opposite": ""
+            },
+            {
+                "name": "Oppugno",
+                "power": 3,
+                "opposite": ""
+            },
+            {
+                "name": "Expulso",
+                "power": 2,
+                "opposite": ""
+            },
+            {
+                "name": "Levicorpus",
+                "power": 6,
+                "opposite": ""
+            },
+            {
+                "name": "Locomotor Mortis",
+                "power": 1,
+                "opposite": ""
+            }
+        ],
+        "position": [
+            10,
+            78
+        ],
+        "this_spell": {
+            "name": "Expelliarmus",
+            "power": 5,
+            "opposite": ""
+        }
+    },
+    "state": "select"
+}

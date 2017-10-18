@@ -1,21 +1,16 @@
 # How game proceeds:
-# timer moves 3.. 2... 1.. all the while scree shows the dictionary i: spell
-# 0. computer waits for my input while the timer moves forward. 
-# 1. The spell hits other player.. the spell is represented by a line. But in a flash we see the anme of he spell
 # 2. The screen shows power reducing for both players
 # 3. breaks if somebody loses else continues
 
-# Game Length = 1 minute
-# Select Player for Yourself
-# Gmae Starts:
-
-# You cast spells with powers the more power you cast to spell, the weaker you become p/5
+# You cast spells with powers the more power you cast to spell, the weaker you become p/2
 # You have maximum 10 spells
 # Winning/ Losing/ Constraints
 # If your power <= 0
 # if spell strength difference > 5
 
-# curses alternate for windows: http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
+## curses alternate for windows: Download http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
+## then pip install location
+
 
 import curses
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
@@ -23,6 +18,8 @@ from random import randint
 import time
 import os
 import json
+from collections import namedtuple
+
 
 
 class Player:
@@ -44,7 +41,7 @@ class Player:
 
 class Spell:
 
-    def __init__(self, name, power):
+    def __init__(self, name, power, opposite=None):
         self.name = name
         self.power = power
         self.opposite = ''
@@ -54,7 +51,7 @@ class Spell:
 
 class Game:
 
-    def __init__(self, player, opponent):
+    def __init__(self, player, opponent, state=None):
         self.player = player
         self.opponent = opponent
         # self.starttime = ''
@@ -63,8 +60,16 @@ class Game:
         self.state = 'select'
 
     def save(self):
-        with open('game_file.json', 'w+') as f:
-            json.dump(self.__dict__, f, indent=4)
+        name = '{}_vs_{}.json'.format(self.player.name, self.opponent.name)
+        with open(name, 'w+') as f:
+            json.dump(self, f, indent=4, default=lambda o: o.__dict__)
+
+    def end(self):
+        pass
+        # create win lose log and save to game_file
+        # make a self learning scenario by tracking the order of spells
+        # and everytime find the best order and save at end or start
+        # then remove randint approach
 
 
 pps = ['Harry Potter', 'Voldemort', 'Dumbledore', 'Snape', 'Hermoine', 'Ron Weasley']
@@ -143,13 +148,46 @@ def create_player():
         player1.spells_available = [i for i in active_spells]
         player2.spells_available = [i for i in active_spells]
         print('Game between {} (You) and {}'.format(player1.name, player2.name))
-        l = input('Press any alphabet and hit enter to continue')
+        l = input('Hit enter to continue')
         if o:
             g = Game(player1, player2)
             game_func(g)
-    elif o == s:
-        pass
+    elif o == 's':
+        files = [s for s in os.listdir() if s.endswith('.json')]
+        files.sort(key=lambda x: os.path.getmtime(x))
+        for i, j in enumerate(files):
+            print('{}: {}'.format(i+1, j))
+        file = files[int(input("Select which game to resume by index")) - 1]
+        g = build_from_file(file)
+        game_func(g)
 
+def build_from_file(file):
+    with open(file) as f:
+        jd = f.read()
+        g = json.loads(jd, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        psa, osa = [], []
+        pss, pts, oss, ots = None, None, None, None
+        for i in g.player.spells_available:
+            psa.append(Spell(i.name, i.power))
+
+        for i in g.opponent.spells_available:
+            osa.append(Spell(i.name, i.power))
+
+        pss = Spell(g.player.speciality.name, g.player.speciality.power)
+        pts = Spell(g.player.speciality.name, g.player.speciality.power)
+        oss = Spell(g.opponent.speciality.name, g.opponent.speciality.power)
+        ots = Spell(g.opponent.speciality.name, g.opponent.speciality.power)
+        player = Player(g.player.name)
+        player.spells_available = psa
+        player.speciality = pss
+        player.power = g.player.power
+        opponent = Player(g.opponent.name)
+        opponent.spells_available = osa
+        opponent.speciality = oss
+        opponent.power = g.opponent.power
+        game = Game(player, opponent)
+    os.remove(file)
+    return game
 
 
 def game_func(game):
@@ -177,6 +215,7 @@ def game_func(game):
         win.addstr(0, 2, ' ' + player1.name + ' : ' + str(player1.power) + ' ')
         win.addstr(0, 30, ' Hogwarts ')
         win.addstr(0, 52, ' ' + player2.name + ' : ' + str(player2.power) + ' ')
+        win.addstr(31, 5, "Press 's' to save the game. and space > space to pause > resume it")
 
         win.addch(player1.position[0], player1.position[1], '#')
         win.addch(player2.position[0], player2.position[1], '#')
@@ -255,9 +294,11 @@ def game_func(game):
                 if result:
                     curses.endwin()
                     print(result)
+                    exit()
                 elif clash_result:
                     curses.endwin()
                     print(clash_result)
+                    exit()
                 else:
                     p1_spell = [[10, 2], [10, 3]]
                     p2_spell = [[10, 77], [10, 76]]
@@ -271,20 +312,20 @@ def clash(player1, player2):
     spell1, spell2 = player1.this_spell, player2.this_spell
 
     if spell1 == player1.speciality:
-        player2.power -= 3 * spell1.power
+        player2.power -= (3 * spell1.power)
     elif spell2 == player2.speciality:
-        player1.power -= 3 * spell2.power
+        player1.power -= (3 * spell2.power)
 
     if spell1.power > spell2.power:
         if spell1.power - spell2.power >= 5:
             return 'Player 1 Kills Player 2, Player 1 wins'
         else:
-            player1.power -= (spell2.power - spell1.power)
+            player1.power -= 2*(spell2.power - spell1.power)
     elif spell1.power < spell2.power:
         if spell2.power - spell1.power >= 5:
             return 'Player 2 Kills Player 1, Player 2 wins'
         else:
-            player2.power -= (spell1.power - spell2.power)
+            player2.power -= 2*(spell1.power - spell2.power)
     return None
 
 
