@@ -2,7 +2,7 @@
 # 2. The screen shows power reducing for both players
 # 3. breaks if somebody loses else continues
 
-# You cast spells with powers the more power you cast to spell, the weaker you become p/2
+# You cast spells with powers the more power you cast to spell, the weaker you become p//2
 # You have maximum 10 spells
 # Winning/ Losing/ Constraints
 # If your power <= 0
@@ -33,9 +33,11 @@ class Player:
         self.spells_available = []
         self.position = []
         self.this_spell = None
+        self.move_log = []
 
     def hit(self, ind):
         spell = self.spells_available.pop(ind)
+        self.move_log.append(sps.index(spell.name))
         self.this_spell = spell
         self.power -=  spell.power//2
         return spell
@@ -61,27 +63,27 @@ class Game:
     def __init__(self, player, opponent, state=None):
         self.player = player
         self.opponent = opponent
-        # self.starttime = ''
         # self.time = time
-        # states: 'select', 'spell', 'score'
-        self.state = 'select'
+        self.state = 'select'                   # states: 'select', 'spell', 'score'
 
     def save(self):
         name = '{}_vs_{}.json'.format(self.player.name, self.opponent.name)
         with open(name, 'w+') as f:
             json.dump(self, f, indent=4, default=lambda o: o.__dict__)
 
-    def end(self):
-        pass
-        # create win lose log and save to game_file
-        # make a self learning scenario by tracking the order of spells
-        # and everytime find the best order and save at end or start
-        # then remove randint approach
+    def end(self, winner):
+        if winner == self.player:
+            tex = [sps.index(self.player.speciality.name), self.player.move_log, sps.index(self.opponent.speciality.name), self.opponent.move_log]
+        else:
+            tex = [sps.index(self.opponent.speciality.name), self.opponent.move_log, sps.index(self.player.speciality.name), self.player.move_log]
+        with open('learn.log', 'a') as f:
+            f.write(str(tex) + "\n")
+        return
 
 
 pps = ['Harry Potter', 'Voldemort', 'Dumbledore', 'Snape', 'Hermoine', 'Ron Weasley']
 sps = [
-    'Avada Kedavra', 'Expelliarmus', 'Annihilate', 'Crucio', 'Imperio', 'Incarcerous', 'Oppugno', 'Expulso', 
+    'Avada Kedavra', 'Annihilate', 'Crucio', 'Imperio', 'Incarcerous', 'Expelliarmus', 'Oppugno', 'Expulso', 
     'Levicorpus', 'Locomotor Mortis'
     ]
 players = {
@@ -90,7 +92,7 @@ players = {
     }
 spells =  {
     'Avada Kedavra' :10, 'Annihilate': 9, 'Crucio': 8, 'Imperio': 7, 'Levicorpus': 6, 'Expelliarmus': 5, 
-    'Incarcerous': 4, 'Oppugno': 3, 'Expulso': 2, 'Locomotor Mortis': 1, 'No Spell': 0
+    'Incarcerous': 4, 'Oppugno': 3, 'Expulso': 2, 'Locomotor Mortis': 1, 'None': 0
     }
 
 guide = [
@@ -123,10 +125,6 @@ def explore():
             print("Press 'p' to Play")
     create_player()
 
-
-# def initiate():
-#     for k in sps:
-#         active_spells.append(Spell(k, spells[k]))
 
 def create_player():
 
@@ -297,7 +295,7 @@ def game_func(game):                                # This function runs in a wh
                     win.addch(p2_spell[i][0], p2_spell[i][1], '-')
             else:
                 win.addch(p2_spell[0][0], 39, '*')
-                clash_result = clash(player1, player2)
+                clash_result = clash(player1, player2, game)
                 result = check_results(player1, player2, game)
                 if result:
                     curses.endwin()
@@ -316,7 +314,7 @@ def game_func(game):                                # This function runs in a wh
     curses.endwin()
 
 
-def clash(player1, player2):                                    # Function to calculate the effects of one spell
+def clash(player1, player2, game):                                    # Function to calculate the effects of one spell
     spell1, spell2 = player1.this_spell, player2.this_spell
 
     if spell1 == player1.speciality:
@@ -326,11 +324,13 @@ def clash(player1, player2):                                    # Function to ca
 
     if spell1.power > spell2.power:
         if spell1.power - spell2.power >= 5:
+            game.end(player1)
             return 'Player 1 Kills Player 2, Player 1 wins'
         else:
             player1.power -= 2*(spell2.power - spell1.power)
     elif spell1.power < spell2.power:
         if spell2.power - spell1.power >= 5:
+            game.end(player2)
             return 'Player 2 Kills Player 1, Player 2 wins'
         else:
             player2.power -= 2*(spell1.power - spell2.power)
@@ -339,16 +339,25 @@ def clash(player1, player2):                                    # Function to ca
 
 def check_results(player1, player2, game):                          # Check final results
     if player1.power < 10:
+        game.end(player2)
         return 'Player1 Lost'
     if player2.power < 10:
+        game.end(player1)
         return 'Player2 Lost'
     if not player1.spells_available and not player2.spells_available:
         if player1.power > player2.power:
+            game.end(player1)
             return 'Player2 Lost'
         else:
+            game.end(player2)
             return 'Player1 Lost'
-    if not player2.spells_available:
-        return 'Player2 Lost'
+    if not player2.spells_available and not player1.spells_available:
+        if player1.power > player2.power:
+            game.end(player1)
+            return 'Player2 Lost because of less power.'
+        elif player2.power > player1.power:
+            game.end(player12)
+        return 'Player 1 Lost. As he had less power.'
     return None
 
 if __name__ == '__main__':
